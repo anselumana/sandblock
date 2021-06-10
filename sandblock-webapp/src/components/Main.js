@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
 function Main(props) {
     const classes = useStyles();
     const [value, setValue] = useState("");
-    const [blockchainValue, setBlockchainValue] = useState("/");
+    const [blockchainValue, setBlockchainValue] = useState("");
 
     // Initialization
     useEffect(() => {
@@ -46,7 +46,7 @@ function Main(props) {
     const handleSubmit = async (e) => {
       e.preventDefault();
       if (value) {
-        await props.boxContract.methods.set(value.toString()).call();
+        await props.boxContract.methods.set(value.toString()).send({from: props.account});
         await updateData();
         setValue("");
       }

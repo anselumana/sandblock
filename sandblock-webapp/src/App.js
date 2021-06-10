@@ -137,6 +137,7 @@ function App(props)  {
                 <div className={classes.paper}>
                     <Head />
                     <Main
+                        account={account}
                         boxContract={box}
                     />
                 </div>
