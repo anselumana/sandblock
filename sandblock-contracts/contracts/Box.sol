@@ -2,13 +2,13 @@
 pragma solidity ^0.8.0;
 
 contract Box {
-    uint private value;
+    string private value;
 
-    function get() public view returns (uint) {
+    function get() public view returns (string memory) {
         return value;
     }
 
-    function set(uint _value) public {
+    function set(string memory _value) public {
         value = _value;
     }
 }

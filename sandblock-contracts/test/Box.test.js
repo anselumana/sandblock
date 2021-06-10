@@ -13,11 +13,11 @@ contract('Box', function () {
 
     // Test case
     it('get() returns a value previously set()', async function () {
-        const value = 42;
+        const value = "hello";
         // Set a value
         await this.box.set(value);
         // Test if the returned value is the same one
         // Note that we need to use strings to compare the 256 bit integers
-        expect((await this.box.get()).toString()).to.equal(value.toString());
+        expect((await this.box.get())).to.equal(value);
     });
 });
