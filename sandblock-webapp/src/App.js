@@ -33,7 +33,10 @@ function App(props)  {
     useEffect(() => {
         async function init() {
             await loadWeb3();
-            await loadBlockchainData();
+            if (web3isLoaded()) {
+                await loadBlockchainData();
+            }
+            setLoading(false);
         }
         init();
     }, []);
@@ -73,7 +76,10 @@ function App(props)  {
         else {
             alert(`Box smart-contract not found in the current network (network ID: ${networkId})`);
         }
-        setLoading(false);
+    }
+
+    const web3isLoaded = () => {
+        return Boolean(window.web3);
     }
 
     const render = () => {
