@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { Switch, Route, Redirect } from "react-router-dom";
 import { ThemeProvider, CssBaseline, Container, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Web3 from 'web3';
 import { darkTheme } from './themes/Themes';
-import Navbar from './components/Navbar';
-import Main from './components/Main';
-import Head from './components/Head';
-import BoxContract from './smart-contract-artifacts/Box.json';
+import Navbar from './components/common/navbar/Navbar';
+import NetworkBar from './components/common/network/NetworkBar';
+import Home from './components/views/home/Home';
+import Box from './components/views/box/Box';
+import GenericSnackbar from "./components/common/snackbar/GenericSnackbar";
+import { useWeb3React } from "@web3-react/core";
+import { InjectedConnector } from "@web3-react/injected-connector";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -21,142 +24,144 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
+const injected = new InjectedConnector({
+    supportedChainIds: [1, 3, 4, 5, 42, 1337],
+});
+
 function App(props)  {
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
-    const [isEthereumBrowser, setIsEthereumBrowser] = useState(false);
-    const [componentsLoaded, setCOmponentsLoaded] = useState(false);
-    const [account, setAccount] = useState("0x0");
-    const [box, setBox] = useState(null);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: "",
+        severity: "success",
+    });
+    const web3 = useWeb3React();
+    const connectionStatusKey = "connectionStatus";
+
+
+    const connectionActive = web3.active;
 
     // Initialization
     useEffect(() => {
         async function init() {
-            await loadWeb3();
-            if (web3isLoaded()) {
-                await loadBlockchainData();
+            if (shouldReconnect()) {
+                await handleConnect();
             }
-            setLoading(false);
         }
         init();
     }, []);
 
-    const loadWeb3 = async () => {
-        let ethBrowser = true;
-        if (window.ethereum) {
-            window.web3 = new Web3(window.ethereum);
-            await window.ethereum.enable();
-        }
-        else if (window.web3) {
-            window.web3 = new Web3(window.web3.currentProvider);
+    const saveConnectionStatus = (connected) => {
+        if (connected) {
+            localStorage.setItem(connectionStatusKey, "connected");
         }
         else {
-            alert("You are using a non-ethereum browser. Consider using MetaMask");
-            ethBrowser = false;
+            localStorage.setItem(connectionStatusKey, "disconnected");
         }
-        if (ethBrowser) {
-            setIsEthereumBrowser(true);
+    }
+
+    const shouldReconnect = () => {
+        // Should implement a logic like with refresh tokens:
+        // set an expiry for the last connection and refresh it
+        // if almost expired (in this case just need to refresh the expiry
+        // (no need to redo the connection))
+        const status = localStorage.getItem(connectionStatusKey);
+        if (status === "connected") {
+            return true;
         }
+        return false;
+    }
+
+    const handleConnect = async () => {
+        try {
+            await web3.activate(injected, undefined, true);
+            onSuccessfulConnection();
+        }
+        catch (error) {
+            onFailedConnection(error.message);
+        }
+    }
+    const onSuccessfulConnection = () => {
+        saveConnectionStatus(true);
+        setSnackbar({
+            open: true,
+            message: "Connected successfully",
+            severity: "success",
+        });
+    }
+    const onFailedConnection = (error) => {
+        setSnackbar({
+            open: true,
+            message: error,
+            severity: "error",
+        });
+    }
+
+    const handleDisconnect = async () => {
+        try {
+            web3.deactivate();
+            onSuccessfulDisconnection();
+        }
+        catch (error) {
+            onFailedDisconnection(error.message);
+        }
+    }
+    const onSuccessfulDisconnection = () => {
+        saveConnectionStatus(false);
+        setSnackbar({
+            open: true,
+            message: "Disconnected",
+            severity: "warning",
+        });
+    }
+    const onFailedDisconnection = (error) => {
+        setSnackbar({
+            open: true,
+            message: error,
+            severity: "error",
+        });
     }
     
-    const loadBlockchainData = async () => {
-        const web3 = window.web3;
-        // Get accounts
-        const accounts = await web3.eth.getAccounts();
-        setAccount(accounts[0]);
-        // Get network ID
-        const networkId = await web3.eth.net.getId();
-        // Load Box contract
-        const boxContract = BoxContract.networks[networkId];
-        if (boxContract) {
-            const box = new web3.eth.Contract(BoxContract.abi, boxContract.address);
-            setBox(box);
-            setCOmponentsLoaded(true);
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
         }
-        else {
-            alert(`Box smart-contract not found in the current network (network ID: ${networkId})`);
-        }
-    }
-
-    const web3isLoaded = () => {
-        return Boolean(window.web3);
-    }
-
-    const render = () => {
-        if (loading) {
-            // return renderLoading();
-            return (
-                <Typography
-                    component="h1"
-                    variant="h6"
-                    color="secondary"
-                >
-                    {">_ loading..."}
-                </Typography>
-            );
-        }
-        else {
-            if (isEthereumBrowser) {
-                if (componentsLoaded) {
-                    return renderBody();
-                }
-                else {
-                    // return renderError(["unable to load all essential components"]);
-                    return (
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="secondary"
-                        >
-                            {">_ unable to load all essential components"}
-                        </Typography>
-                    );
-                }
-            }
-            else {
-                // return renderError(["non-ethereum browser", "cannot use app"]);
-                return (
-                    <div>
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="secondary"
-                        >
-                            {">_ non-ethereum browser"}
-                        </Typography>
-                        <Typography
-                            component="h1"
-                            variant="h6"
-                            color="secondary"
-                        >
-                            {">_ cannot use app"}
-                        </Typography>
-                    </div>
-                );
-            }
-        }
-    }
-
-    const renderBody = () => {
-        return (
-            <Container component="main" maxWidth="md">
-                <div className={classes.paper}>
-                    <Head />
-                    <Main
-                        account={account}
-                        boxContract={box}
-                    />
-                </div>
-            </Container>
-        )
+        const currentSnackbarSeverity = snackbar.severity;
+        setSnackbar({
+            open: false,
+            message: "",
+            severity: currentSnackbarSeverity,
+        });
     }
 
     return (
         <div>
             <ThemeProvider theme={darkTheme}>
                 <CssBaseline/>
-                <Navbar />
-                {render()}
+                <Navbar
+                    onConnect={handleConnect}
+                    onDisconnect={handleDisconnect} />
+                <NetworkBar />
+                <Switch>
+                    <Route exact path="/home">
+                        <Home />
+                    </Route>
+                    <Route exact path="/box">
+                        <Box />
+                    </Route>
+                    <Route exact path="/">
+                        <Redirect to="/home" />
+                    </Route>
+                    <Route path="*">
+                        <div>{">_ Sorry, page not found"}</div>
+                    </Route>
+                </Switch>
+                <GenericSnackbar
+                    open={snackbar.open}
+                    onClose={handleSnackbarClose}
+                    message={snackbar.message}
+                    severity={snackbar.severity} />
             </ThemeProvider>
         </div>
     );

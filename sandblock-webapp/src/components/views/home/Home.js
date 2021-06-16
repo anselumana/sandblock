@@ -8,6 +8,7 @@ const useStyles = makeStyles((theme) => ({
         alignItems: "center",
         justifyContent: "center",
         flexDirection: "column",
+        marginTop: theme.spacing(8)
     },
     title: {
         display: "flex",
@@ -22,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-function Head(props) {
+function Home(props) {
     const classes = useStyles();
     return (
         <div className={classes.root}>
@@ -56,4 +57,4 @@ function Head(props) {
     );
 }
 
-export default Head;
+export default Home;

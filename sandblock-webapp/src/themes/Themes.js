@@ -1,5 +1,5 @@
 import { createMuiTheme } from '@material-ui/core/styles';
-import { amber, cyan } from '@material-ui/core/colors';
+import { amber, cyan, grey } from '@material-ui/core/colors';
 
 const darkTheme = createMuiTheme({
     palette: {
@@ -8,7 +8,7 @@ const darkTheme = createMuiTheme({
             main: amber[600],
         },
         secondary: {
-            main: cyan[600],
+            main: grey[700],
         },
     },
     typography: {
