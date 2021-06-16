@@ -10,6 +10,7 @@ import Box from './components/views/box/Box';
 import GenericSnackbar from "./components/common/snackbar/GenericSnackbar";
 import { useWeb3React } from "@web3-react/core";
 import { InjectedConnector } from "@web3-react/injected-connector";
+import AutoReconnect from "./utils/auto-reconnect";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -28,6 +29,9 @@ const injected = new InjectedConnector({
     supportedChainIds: [1, 3, 4, 5, 42, 1337],
 });
 
+console.log("re-instanciating AutoReconnect")
+const autoReconnect = new AutoReconnect();
+
 function App(props)  {
     const classes = useStyles();
     const [loading, setLoading] = useState(true);
@@ -39,39 +43,15 @@ function App(props)  {
     const web3 = useWeb3React();
     const connectionStatusKey = "connectionStatus";
 
-
-    const connectionActive = web3.active;
-
     // Initialization
     useEffect(() => {
         async function init() {
-            if (shouldReconnect()) {
+            if (autoReconnect.shouldReconnect()) {
                 await handleConnect();
             }
         }
         init();
     }, []);
-
-    const saveConnectionStatus = (connected) => {
-        if (connected) {
-            localStorage.setItem(connectionStatusKey, "connected");
-        }
-        else {
-            localStorage.setItem(connectionStatusKey, "disconnected");
-        }
-    }
-
-    const shouldReconnect = () => {
-        // Should implement a logic like with refresh tokens:
-        // set an expiry for the last connection and refresh it
-        // if almost expired (in this case just need to refresh the expiry
-        // (no need to redo the connection))
-        const status = localStorage.getItem(connectionStatusKey);
-        if (status === "connected") {
-            return true;
-        }
-        return false;
-    }
 
     const handleConnect = async () => {
         try {
@@ -83,7 +63,7 @@ function App(props)  {
         }
     }
     const onSuccessfulConnection = () => {
-        saveConnectionStatus(true);
+        autoReconnect.onConnect();
         setSnackbar({
             open: true,
             message: "Connected successfully",
@@ -108,7 +88,7 @@ function App(props)  {
         }
     }
     const onSuccessfulDisconnection = () => {
-        saveConnectionStatus(false);
+        autoReconnect.onDisconnect();
         setSnackbar({
             open: true,
             message: "Disconnected",
