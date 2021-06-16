@@ -41,7 +41,6 @@ function App(props)  {
         severity: "success",
     });
     const web3 = useWeb3React();
-    const connectionStatusKey = "connectionStatus";
 
     // Initialization
     useEffect(() => {

@@ -40,7 +40,6 @@ function Box(props) {
 
     const boxContractLoaded = Boolean(boxContract);
 
-    // Initialization
     useEffect(() => {
         async function init() {
             if (web3.active) {

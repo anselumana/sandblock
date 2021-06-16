@@ -9,10 +9,9 @@ class AutoReconnect {
     timerId;
 
     onConnect() {
-        console.log("onConnect called")
         localStorage.setItem(this.lastConnectKey, Date.now().toString());
         const refreshTimeout = this.timeout * 0.9; // Make a little bit smaller
-        console.log("setting timer to refresh at " + Date.now().toString() + refreshTimeout.toString())
+        // console.log("setting timer to refresh at " + Date.now().toString() + refreshTimeout.toString())
         this.timerId = setTimeout(() => {
             // Repeteadly refresh expiration timeout
             this.onConnect();
@@ -20,7 +19,6 @@ class AutoReconnect {
     }
 
     onDisconnect() {
-        console.log("onDisconnect called")
         localStorage.removeItem(this.lastConnectKey);
         clearTimeout(this.timerId);
     }
