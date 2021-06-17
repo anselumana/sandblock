@@ -6,7 +6,7 @@ function GenericSnackbar(props) {
     return (
         <Snackbar
             open={props.open}
-            autoHideDuration={6000}
+            autoHideDuration={props.duration}
             onClose={props.onClose}
             key={props.message}
             anchorOrigin={{

@@ -1,8 +1,10 @@
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from "react-router-dom";
+import { ThemeProvider, CssBaseline } from '@material-ui/core';
 import { Web3ReactProvider } from '@web3-react/core';
 import Web3 from 'web3';
 import App from './App';
+import { darkTheme } from './themes/Themes';
 
 // Use this method to configure which web3 library will be used in the app.
 // To consume it, call the hook "const web3 = useWeb3React()", and the library
@@ -17,7 +19,10 @@ const mountPoint = document.getElementById('root');
 ReactDOM.render(
     <Web3ReactProvider getLibrary={getLibrary}>
         <BrowserRouter>
-                <App />
+            <ThemeProvider theme={darkTheme}>
+                    <CssBaseline/>
+                    <App />
+            </ThemeProvider>
         </BrowserRouter>
     </Web3ReactProvider>,
     mountPoint

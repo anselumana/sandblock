@@ -5,6 +5,7 @@ import Error from '../error/Error';
 import Loading from '../../common/progress/Loading';
 import BoxContract from '../../../smart-contract-artifacts/Box.json';
 import { useWeb3React } from "@web3-react/core";
+import { withSnackbar } from '../../common/HOCs/withSnackbar';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -74,9 +75,27 @@ function Box(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (value) {
-            await boxContract.methods.set(value.toString()).send({from: web3.account});
+            // Contract call
+            await boxContract.methods.set(value.toString())
+                .send({from: web3.account})
+                .on('error', error => {
+                    props.showMessage(error.message, "error");
+                })
+                .on('transactionHash', transactionHash => {
+                    props.showMessage(`Sent TX ${transactionHash}. It might take some time to be received and confirmed.`);
+                    setValue(""); // Reset input filed
+                })
+                .on('receipt', receipt => {
+                    props.showMessage(`TX ${receipt.transactionHash} has been received. Added to block ${receipt.blockNumber}`);
+                })
+                .on('confirmation', (confirmationNumber, receipt) => {
+                    if (confirmationNumber === 3) {
+                        props.showMessage(`Received the 3rd confirmation for TX ${receipt.transactionHash}`);
+                    }
+                })
+                .then(data => {
+                });;
             await updateData();
-            setValue("");
         }
     }
 
@@ -162,4 +181,4 @@ function Box(props) {
     );
 }
 
-export default Box;
+export default withSnackbar(Box);
