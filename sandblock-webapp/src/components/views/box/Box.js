@@ -6,6 +6,7 @@ import Loading from '../../common/progress/Loading';
 import BoxContract from '../../../smart-contract-artifacts/Box.json';
 import { useWeb3React } from "@web3-react/core";
 import { withSnackbar } from '../../common/HOCs/withSnackbar';
+import { withPageStructure } from '../../common/HOCs/withPageStructure';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -163,7 +164,6 @@ function Box(props) {
                         disabled
                         fullWidth
                         label="Current value"
-                        helperText="Data source: blockchain"
                         variant="outlined"
                         value={blockchainValue}
                     />
@@ -181,4 +181,13 @@ function Box(props) {
     );
 }
 
-export default withSnackbar(Box);
+const page = {
+    title: "box",
+    subtitle: "Simple GET/SET smart contract",
+    infos: [
+        'A blockchain is basically a decentralized, distributed and immutable database.',
+        'One of the most basic operations you may perform on a database is to write some data and be able to read it back.',
+        'This page shows exactly this: how to write some custom data ("Value") to the blockchain and read it ("Current value"), demistifying the complexity behind this technology and demonstrating its simplest usage.'
+    ],
+}
+export default withPageStructure(withSnackbar(Box), page);
