@@ -7,8 +7,9 @@ import Home from './components/views/home/Home';
 import Box from './components/views/box/Box';
 import { useWeb3React } from "@web3-react/core";
 import { InjectedConnector } from "@web3-react/injected-connector";
-import AutoReconnect from "./utils/auto-reconnect";
+import AutoReconnect from "./utils/AutoReconnect";
 import { withSnackbar } from "./components/common/HOCs/withSnackbar";
+import ChainChangeHelper from "./utils/ChainChangeHelper";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -27,8 +28,8 @@ const injected = new InjectedConnector({
     supportedChainIds: [1, 3, 4, 5, 42, 1337],
 });
 
-console.log("re-instanciating AutoReconnect")
 const autoReconnect = new AutoReconnect();
+const chainChangeHelper = new ChainChangeHelper();
 
 function App(props)  {
     const classes = useStyles();
@@ -45,6 +46,19 @@ function App(props)  {
         }
         init();
     }, []);
+
+    // Chain change handling
+    const chainId = web3.chainId;
+    useEffect(() => {
+        async function action() {
+            console.log("chacking chain change...")
+            if (chainChangeHelper.hasChanged(chainId)) {
+                console.log("CHANGED!")
+                handleDisconnect();
+            }
+        }
+        action();
+    }, [chainId]);
 
     const handleConnect = async () => {
         try {
@@ -74,6 +88,7 @@ function App(props)  {
     }
     const onSuccessfulDisconnection = () => {
         autoReconnect.onDisconnect();
+        chainChangeHelper.reset();
         props.showMessage("Disconnected", "warning");
     }
     const onFailedDisconnection = (error) => {
