@@ -34,10 +34,14 @@ function InfoMenu(props) {
       </div> 
     )
   };
+
   const renderInfos = () => {
     const infos = props.infos.map(info => {
       return (
-        <div className={classes.info}> 
+        <div
+          key={info}
+          className={classes.info}
+        > 
           <p>
             {info}
           </p>
