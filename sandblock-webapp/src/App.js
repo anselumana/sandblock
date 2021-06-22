@@ -51,9 +51,7 @@ function App(props)  {
     const chainId = web3.chainId;
     useEffect(() => {
         async function action() {
-            console.log("chacking chain change...")
             if (chainChangeHelper.hasChanged(chainId)) {
-                console.log("CHANGED!")
                 handleDisconnect();
             }
         }

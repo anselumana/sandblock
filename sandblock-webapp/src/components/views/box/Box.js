@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Grid, TextField, Button } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import Error from '../error/Error';
+import Error from '../../common/error/Error';
 import Loading from '../../common/progress/Loading';
 import BoxContract from '../../../smart-contract-artifacts/Box.json';
 import { useWeb3React } from "@web3-react/core";
+import View from '../../common/base-view/View';
 import { withSnackbar } from '../../common/HOCs/withSnackbar';
-import { withPageStructure } from '../../common/HOCs/withPageStructure';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-      marginTop: theme.spacing(8)
-    },
     setGroup: {
       display: "flex",
       alignItems: "center",
@@ -30,6 +27,16 @@ const useStyles = makeStyles((theme) => ({
       height: "100%"
     }
 }));
+
+const viewInfo = {
+    title: "box",
+    subtitle: "Simple GET/SET smart contract",
+    infos: [
+        'A blockchain is basically a decentralized, distributed and immutable database.',
+        'One of the most basic operations you may perform on a database is to write some data and be able to read it back.',
+        'This page shows exactly this: how to write some custom data ("Value") to the blockchain and read it ("Current value"), demistifying the complexity behind this technology and demonstrating its simplest usage.'
+    ],
+}
 
 function Box(props) {
     const classes = useStyles();
@@ -133,7 +140,7 @@ function Box(props) {
 
     const renderBox = () => {
         return (
-            <div>
+            <>
                 <form
                     className={classes.setGroup}
                     onSubmit={handleSubmit}
@@ -168,26 +175,17 @@ function Box(props) {
                         value={blockchainValue}
                     />
                 </div>
-            </div>
+            </>
         );
     }
 
     return (
-        <Container component="main" maxWidth="xs">
-            <div className={classes.root}>
-                {render()}
-            </div>
-        </Container>
+        <View
+            {...viewInfo}
+        >
+            {render()}
+        </View>
     );
 }
 
-const page = {
-    title: "box",
-    subtitle: "Simple GET/SET smart contract",
-    infos: [
-        'A blockchain is basically a decentralized, distributed and immutable database.',
-        'One of the most basic operations you may perform on a database is to write some data and be able to read it back.',
-        'This page shows exactly this: how to write some custom data ("Value") to the blockchain and read it ("Current value"), demistifying the complexity behind this technology and demonstrating its simplest usage.'
-    ],
-}
-export default withPageStructure(withSnackbar(Box), page);
+export default withSnackbar(Box);
